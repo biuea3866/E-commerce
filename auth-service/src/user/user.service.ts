@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { ResponseUser } from '../vo/response.user';
 import { hash } from 'src/util/util.hash';
-import { response } from 'express';
 
 @Injectable()
 export class UserService {
@@ -56,11 +55,7 @@ export class UserService {
 
     public async getUser(userId: string): Promise<ResponseUser> {
         return await this.userRepository
-                         .createQueryBuilder("user")
-                         .where("user_entity.userId = :userId", {
-                             userId: userId,
-                         })
-                         .getOne();
+                         .findOne({ where: { userId: userId }});
     }
 
     updateUser(userDto: UserDto): Promise<UserDto> {
