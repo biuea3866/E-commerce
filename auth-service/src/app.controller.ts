@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/guard/local-auth.guard';
@@ -61,5 +62,11 @@ export class AppController {
         userDto.nickname = requestUpdate.nickname;
         
         return this.userService.updateUser(userDto);
+    }
+    
+    @EventPattern('health_check')
+    public async getCatalogServiceStatus(data: any): Promise<any> {
+        console.log(data);
+        return data;
     }
 }
