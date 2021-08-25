@@ -68,4 +68,14 @@ export class CatalogService {
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         } 
     }
+
+    public async createOrderAndDecreaseStock(data: any): Promise<any> {
+        const catalogEntity = await this.catalogRepository.findOne({ where: { productId: data.productId }});
+
+        catalogEntity.stock -= data.qty;
+
+        await this.catalogRepository.save(catalogEntity);
+
+        return catalogEntity;
+    }  
 }

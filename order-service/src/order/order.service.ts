@@ -1,15 +1,18 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderDto } from 'src/dto/order.dto';
 import { OrderEntity } from 'src/entity/order.entity';
 import { ResponseOrder } from 'src/vo/response.order';
 import { Repository } from 'typeorm';
-
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class OrderService {
-    constructor(@InjectRepository(OrderEntity) private orderRepository: Repository<OrderEntity>) {}
+    constructor(
+        @InjectRepository(OrderEntity) private orderRepository: Repository<OrderEntity>,
+        @Inject('order-service') private readonly client: ClientProxy    
+    ) {}
 
     public async create(orderDto: OrderDto): Promise<ResponseOrder> {
         try {
@@ -24,6 +27,8 @@ export class OrderService {
             orderEntity.userId = orderDto.userId;
             orderEntity.status = 'CREATE_ORDER';
 
+            this.client.emit('CREATE_ORDER', orderEntity);
+            
             await this.orderRepository.save(orderEntity);
             
             const responseOrder = new ResponseOrder();

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Inject, Logger, Param, Patch, Post } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, EventPattern } from '@nestjs/microservices';
 import { CatalogDto } from 'src/dto/catalog.dto';
 import { RequestCreate } from 'src/vo/request.create';
 import { RequestUpdate } from 'src/vo/request.update';
@@ -10,12 +10,10 @@ import { CatalogService } from './catalog.service';
 export class CatalogController {
     constructor(
         private readonly catalogService: CatalogService,
-        @Inject('catalog-service') private readonly client: ClientProxy
     ) {}
 
     @Get('health_check')
     public async status() {
-        this.client.emit('health_check', "It's working catalog-service")
         return await "It's working catalog-service";
     }
 
@@ -54,5 +52,10 @@ export class CatalogController {
         catalogDto.unitPrice = requestUpdate.unitPrice;
 
         return await this.catalogService.updateCatalog(catalogDto);
+    }
+
+    @EventPattern('CREATE_ORDER')
+    public async createOrderAndDecreaseStock(data: any): Promise<any> {
+        return await this.catalogService.createOrderAndDecreaseStock(data);
     }
 }
