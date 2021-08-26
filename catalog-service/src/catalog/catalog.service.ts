@@ -1,4 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogDto } from 'src/dto/catalog.dto';
 import { CatalogEntity } from 'src/entity/catalog.entity';
@@ -7,7 +8,10 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class CatalogService {
-    constructor(@InjectRepository(CatalogEntity) private catalogRepository: Repository<CatalogEntity>) {}
+    constructor(
+        @InjectRepository(CatalogEntity) private catalogRepository: Repository<CatalogEntity>,
+        @Inject('catalog-service') private readonly client: ClientProxy    
+    ) {}
 
     public async create(catalogDto: CatalogDto): Promise<ResponseCatalog> {
         try {
@@ -74,8 +78,40 @@ export class CatalogService {
 
         catalogEntity.stock -= data.qty;
 
+        if(catalogEntity.stock < 0) {
+            data.status = 'ERROR_ORDER';
+
+            this.client.emit('ERROR_ORDER', data);
+            
+            catalogEntity.stock += data.qty;
+
+            await this.catalogRepository.save(catalogEntity);
+            
+            return data.status + " : Product stock is less than 0";
+        } else {
+            await this.catalogRepository.save(catalogEntity);
+
+            return catalogEntity;
+        }
+    }  
+
+    public async cancelOrderAndRollbackStock(data: any): Promise<any> {
+        const catalogEntity = await this.catalogRepository.findOne({ where: { productId: data.productId }});
+
+        catalogEntity.stock += data.qty;
+
         await this.catalogRepository.save(catalogEntity);
 
-        return catalogEntity;
-    }  
+        return "Successfully Rollback stock";
+    }
+
+    public async reOrderAndDecreaseStock(data: any): Promise<any> {
+        const catalogEntity = await this.catalogRepository.findOne({ where: { productId: data.productId }});
+
+        catalogEntity.stock -= data.qty;
+
+        await this.catalogRepository.save(catalogEntity);
+
+        return "Complete Reorder";
+    }
 }

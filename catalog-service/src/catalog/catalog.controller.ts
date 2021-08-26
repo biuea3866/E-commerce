@@ -58,4 +58,14 @@ export class CatalogController {
     public async createOrderAndDecreaseStock(data: any): Promise<any> {
         return await this.catalogService.createOrderAndDecreaseStock(data);
     }
+
+    @EventPattern('CANCEL_ORDER')
+    public async cancelOrderAndRollbackStock(data: any): Promise<any> {
+        return await this.catalogService.cancelOrderAndRollbackStock(data);
+    }
+
+    @EventPattern('RE_ORDER')
+    public async reOrderAndDecreaseStock(data: any): Promise<any> {
+        return await this.catalogService.reOrderAndDecreaseStock(data);
+    }
 }

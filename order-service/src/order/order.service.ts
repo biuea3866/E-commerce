@@ -94,6 +94,8 @@ export class OrderService {
             orderEntity.status = 'CANCEL_ORDER';
 
             await this.orderRepository.save(orderEntity);
+            
+            this.client.emit('CANCEL_ORDER', orderEntity);
 
             responseOrder.orderId = orderEntity.orderId;
             responseOrder.status = orderEntity.status;
@@ -111,6 +113,8 @@ export class OrderService {
             
             orderEntity.status = 'RE_ORDER';
 
+            this.client.emit("RE_ORDER", orderEntity);
+            
             await this.orderRepository.save(orderEntity);
 
             responseOrder.orderId = orderEntity.orderId;
@@ -120,5 +124,15 @@ export class OrderService {
         } catch(err) {
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public async errorOrder(data: any): Promise<any> {
+        const orderEntity = await this.orderRepository.findOne({ where: { orderId: data.orderId }});
+
+        orderEntity.status = "ERROR_ORDER";
+
+        await this.orderRepository.save(orderEntity);
+
+        return "Product stock is less than 0 so please modifying qty, reorder this product";
     }
 }

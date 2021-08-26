@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { EventPattern } from '@nestjs/microservices';
 import { OrderDto } from 'src/dto/order.dto';
 import { RequestCreate } from 'src/vo/request.create';
 import { RequestUpdate } from 'src/vo/request.update';
@@ -59,5 +60,10 @@ export class OrderController {
     @Post(':orderId/reorder')
     public async reOrder(@Param('orderId') orderId: string) {
         return await this.orderService.reOrder(orderId);
+    }
+
+    @EventPattern('ERROR_ORDER')
+    public async errorOrder(data: any) {
+        return await this.orderService.errorOrder(data);
     }
 }
