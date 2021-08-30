@@ -19,18 +19,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    ClientsModule.register([
-    {
-      name: 'catalog-service',
-      transport: Transport.RMQ,
-      options: {
-        urls: ['amqps://uotqkcgc:GWHwpSEej3eXigR41VjbiZwalO6r8pCI@cattle.rmq2.cloudamqp.com/uotqkcgc'],
-        queue: 'ecommerce_queue',
-        queueOptions: {
-          durable: false
-        },
-      },
-    }]),
     UserModule,
     AuthModule
   ],

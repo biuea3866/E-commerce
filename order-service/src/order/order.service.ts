@@ -106,11 +106,13 @@ export class OrderService {
         }
     }
 
-    public async reOrder(orderId: string): Promise<ResponseOrder> {
+    public async reOrder(orderDto: OrderDto): Promise<ResponseOrder> {
         try {
-            const orderEntity = await this.orderRepository.findOne({ where: { orderId: orderId }});
+            const orderEntity = await this.orderRepository.findOne({ where: { orderId: orderDto.orderId }});
             const responseOrder = new ResponseOrder();
             
+            orderEntity.qty = orderDto.qty;
+            orderEntity.totalPrice = (Number(orderEntity.qty) * Number(orderEntity.unitPrice));
             orderEntity.status = 'RE_ORDER';
 
             this.client.emit("RE_ORDER", orderEntity);

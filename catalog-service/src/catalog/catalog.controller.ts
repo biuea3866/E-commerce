@@ -19,7 +19,6 @@ export class CatalogController {
 
     @Post('create')
     public async create(@Body() requestCreate: RequestCreate) : Promise<ResponseCatalog> {
-        Logger.debug(requestCreate);
         const catalogDto = new CatalogDto();
 
         catalogDto.productId = requestCreate.productId;

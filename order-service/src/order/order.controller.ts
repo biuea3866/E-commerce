@@ -58,8 +58,16 @@ export class OrderController {
     }
 
     @Post(':orderId/reorder')
-    public async reOrder(@Param('orderId') orderId: string) {
-        return await this.orderService.reOrder(orderId);
+    public async reOrder(
+        @Param('orderId') orderId: string,
+        @Body() requestUpdate: RequestUpdate    
+    ) {
+        const orderDto = new OrderDto();
+
+        orderDto.orderId = orderId;
+        orderDto.qty = requestUpdate.qty;
+
+        return await this.orderService.reOrder(orderDto);
     }
 
     @EventPattern('ERROR_ORDER')
